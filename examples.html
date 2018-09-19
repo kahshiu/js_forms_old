@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Modern DOM</title>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0,minimal-ui">
+
+        <script src="util.js"></script>
+        <script src="dom4.js"></script>
+        <script src="signals.min.js"></script>
+        <script src="document-register-element.js"></script>
+        <script src="innerHTML.js"></script>
+
+        <script src="forms.js"></script>
+        <script src="elements.js"></script>
+        <link rel="stylesheet" href="elements.css">
+    </head>
+    <body is="my-base">
+        1. Testing Modal windows <hr>
+        <my-modal-content id="m1"> 
+            This is modal1 
+            <div> asdfasdf asdfas fasfa </div>
+            <table>
+                <tr>
+                    <td>asfasdf</td>
+                    <td>asfasdf</td>
+                    <td>asfasdf</td>
+                </tr>
+                <tr>
+                    <td>asfasdf</td>
+                    <td>asfasdf</td>
+                    <td>asfasdf</td>
+                </tr>
+            </table>
+        </my-modal-content>
+        <my-modal-content id="m2"> This is modal2 </my-modal-content>
+        <div id="mm">
+            <input type="button" name="ss" value="modal1" target="m1">
+            <input type="button" name="ss" value="modal2" target="m2">
+        </div>
+        <script>
+            document.getElementById("mm").onclick=function(ev){
+                var t = ev.target;
+                var target = t.getAttribute("target");
+                if(target==="m1" || target==="m2") {
+                    document.getElementById(target).showContent();
+                }
+            }
+        </script>
+
+        <br>
+        <br>
+        2. testing table cells
+        <hr>
+        <table>
+            <tbody>
+                <tr>
+                    <td is="my-td" id="td6">td6</td>
+                    <td is="my-td" id="td5">td5</td>
+                    <td is="my-td" id="td4">td4</td>
+                </tr>
+                <tr>
+                    <td is="my-td" id="td3">td3</td>
+                    <td is="my-td" id="td2">td2</td>
+                    <td is="my-td" id="td1">td1</td>
+                </tr>
+            </tbody>
+        </table>
+        <script>
+            var td1 = document.getElementById("td1");
+            td1.setData("testing");
+            //console.log("td1",td1.getData());
+            //console.log("td1",td1.getPosition());
+        </script>
+
+        <br>
+        <br>
+        2. testing table rows
+        <hr>
+        <table>
+            <tbody>
+                <tr is="my-tr" id="tr1"> </tr>
+                <tr is="my-tr" id="tr2"> </tr>
+            </tbody>
+        </table>
+        <script>
+            var tr1 = document.getElementById("tr1");
+            var tr2 = document.getElementById("tr2");
+            tr1.setPipeline(
+                undefined
+                ,function(td,data,index,list) {
+                    td.setData(data);
+                }
+                ,function(td,data,index,list) {
+                    td.textContent = td.getData();
+                }
+            )
+            // test array data
+            tr1.renderData(["test","something","within","row"])
+
+            // test array data
+            tr2.setPipeline(
+                undefined
+                ,function(td,data,index,list) {
+                    td.setData(data.y);
+                }
+                ,function(td,data,index,list) {
+                    td.textContent = td.getData();
+                }
+            )
+            tr2.renderData([
+                 {x:"test"      ,y:"bbb"  }
+                ,{x:"something" ,y:"aaa"  }
+                ,{x:"within"    ,y:"dddd" }
+                ,{x:"row"       ,y:"hhh"  }
+            ])
+            console.log("tr2",tr2.getData())
+            console.log("tr2",tr2.getPosition())
+        </script>
+
+        <br>
+        <br>
+        3. testing table body
+        <hr>
+        <table>
+            <tbody is="my-tbody" id="tb2">
+            </tbody>
+        </table>
+        <script>
+            var tb2 = document.getElementById("tb2");
+            tb2.setPipeline(
+                undefined
+                ,undefined
+                ,function(tr,data,index,list) {
+                    if(index>0) {
+                        tr.setPipeline(
+                            undefined
+                            ,undefined
+                            ,function(td,data,index,list) {
+                                if(index>2) {
+                                    td.textContent = "GOAL!"
+                                } else {
+                                    td.textContent = td.getData();
+                                }
+                            }
+                        )
+                    } else {
+                        tr.setPipeline(
+                            undefined
+                            ,undefined
+                            ,function(td,data,index,list) {
+                                if(index==0) {
+                                    td.textContent = "000"
+                                } else {
+                                    td.textContent = td.getData();
+                                }
+                            }
+                        )
+                    }
+                    tr.renderData(data);
+                }
+            )
+            tb2.renderData([
+                  ["test","something","within","row"]
+                 ,["test2","something2","within2","row2"]
+                 ,["test3","something3","within3","row3"]
+            ]);
+        </script>
+
+        <br>
+        <br>
+        4. testing table
+        <hr>
+        <table is="my-table" id="tb3"> </table>
+        <script>
+            var tb3 = document.getElementById("tb3");
+            tb3.bodyPipeline(
+                undefined
+                ,undefined
+                ,function(tr,data,index,list){
+                    tr.setPipeline(
+                        undefined
+                        ,undefined
+                        ,function(td,data,index,list){
+                            td.textContent = "ss|" + data;
+                        }
+                    );
+                    tr.renderData(data);
+                }
+            );
+            tb3.renderData({
+                 COLUMNS:["col1","col2","col3","col4"]
+                ,DATA:[
+                  ["test","something","within","row"]
+                 ,["test2","something2","within2","row2"]
+                 ,["test3","something3","within3","row3"]
+                ]
+            });
+        </script>
+
+        <!--
+        <br>
+        <br>
+        5. testing calendar
+        <hr>
+        <my-calendar id="c11"> </my-calendar>
+        -->
+
+        <br>
+        <br>
+        6. warning text content
+        <hr>
+        <my-msg id="msg11"> </my-msg>
+        <script>
+            var msg11 = document.getElementById("msg11")
+            msg11.printArray(["hello","staggered"])
+        </script>
+
+        <br>
+        <br>
+        7. checkbox
+        <hr>
+            <input type="checkbox" value="1" name=ch is="my-checkbox-radio"> test
+        <br><input type="checkbox" value="3" name=ch is="my-checkbox-radio"> test1
+        <br><input type="checkbox" value="2" name=ch is="my-checkbox-radio"> test2
+        <br><input type="checkbox" value="4" name=ch is="my-checkbox-radio"> test3
+
+        <my-msg-validate target-name="ch"> </my-msg-validate>
+        <script>
+            elsEach(document.getElementsByName("ch"),function(el,index,list){
+                el.getValidation().pushAll(["required"],["minLen",{len:2}])
+            })
+        </script>
+
+        <br>
+        <br>
+        8. checkbox
+        <hr>
+            <input type="radio" value="1" name=rd is="my-checkbox-radio"> test
+        <br><input type="radio" value="3" name=rd is="my-checkbox-radio"> test1
+        <br><input type="radio" value="2" name=rd is="my-checkbox-radio"> test2
+        <br><input type="radio" value="4" name=rd is="my-checkbox-radio"> test3
+
+<!---
+        <my-msg-validate target-name="rd"> </my-msg-validate>
+        <script>
+            elsEach(document.getElementsByName("ch"),function(el,index,list){
+                el.getValidation().pushAll(["required"],["minLen",{len:2}])
+            })
+        </script>
+--->
+
+        <br>
+        <br>
+        9. select
+        <hr>
+        <select is="my-select" id="sel" name="sel">
+            <option value="test1">test1</option>
+            <option value="test2">test2</option>
+            <option value="test3">test3</option>
+            <option value="test4">test4</option>
+        </select>
+        <br>
+        <select is="my-select" id="sel2" name="sel2" multiple>
+            <option value="ss1">ss1</option>
+            <option value="ss2">ss2</option>
+            <option value="ss3">ss3</option>
+            <option value="ss4">ss4</option>
+        </select>
+
+        <br>
+        <br>
+        10. textbox
+        <hr>
+        <table>
+        <tr><td>text </td><td><input type="text" is="my-textbox" data-type="text"  id="ftext"   name="ftext"  >  <td><tr>
+        <tr><td>date </td><td><input type="text" is="my-textbox" data-type="date"  id="fdate"   name="fdate"  >  <td><tr>
+        <tr><td>date </td><td><input type="text" is="my-textbox" data-type="date"  id="fdate"   name="fdate"  value="10/10/2020">  <td><tr>
+        <tr><td>money</td><td><input type="text" is="my-textbox" data-type="money" id="fmoney"  name="fmoney" >  <td><tr>
+        <tr><td>money</td><td><input type="text" is="my-textbox" data-type="money" id="fmoney2" name="fmoney2">  <td><tr>
+        <tr><td>ic   </td><td><input type="text" is="my-textbox" data-type="ic"    id="fic"     name="fic"    >  <td><tr>
+        <tr><td>phone</td><td><input type="text" is="my-textbox" data-type="phone" id="fphone"  name="fphone" >  <td><tr>
+        </table>
+
+        <br>
+        <br>
+        11. datetime textbox
+        <hr>
+        <input is="my-textbox" data-type="date">
+        <input is="my-textbox" data-type="date">
+        <input is="my-textbox" data-type="date">
+        <input is="my-textbox" data-type="date">
+
+        <br>
+        <br>
+        12. looping text
+        <hr>
+        <my-msg-loop id="mloop">
+        </my-msg-loop>
+        <script>
+var mloop = document.getElementById("mloop");
+mloop.setupLoop("hello");
+mloop.startLoop("hello");
+        </script>
+
+        <br>
+        <br>
+        13. ajax
+        <hr>
+        <my-ajax method="GET" action="http://localhost:8888/loud/?CFID=1457a3c2-4f05-425e-8781-771555f4eb3f&CFTOKEN=0&route=f*mm.test&x=testing" id="jax">
+        </my-ajax>
+        <script>
+            //data,success,error,ready,connected,responded,processing
+            var jax = document.getElementById("jax");
+            jax.fire({"test":111,"another":222},function(){console.log("got it!",arguments)})
+        </script>
+
+        <br>
+        <br>
+        <br>
+    </body>
+</html>

@@ -1,0 +1,93 @@
+.hide {
+    ;display: none
+}
+my-calendar {
+    ;position: absolute
+    ;padding: 0.4rem
+    ;border-radius: 6px
+    ;border: solid 2px #AAA
+    ;background-color: #E0E0E0
+    ;font-family: "Lucida Console",Monaco,monospace
+}
+my-calendar .indicator {
+    ;width: 20rem
+    ;font-size: 1rem
+    ;margin-top: 0.6rem
+}
+my-calendar .indicator>* {
+    ;display: inline-block
+    ;text-align: center
+}
+my-calendar .indicator .button {
+    ;width: 10%
+    ;margin: 0rem
+    ;padding: 0rem
+}
+my-calendar .indicator .mid {
+    ;width: 72%
+}
+my-calendar .scrollval {
+    ;width: 28%
+}
+my-calendar table {
+    ;width: 100%
+}
+my-calendar thead {
+    ;font-size: 0.8rem
+}
+my-calendar td {
+    ;padding: 0.4rem 0.2rem
+    ;border-radius: 4px
+    ;text-align: center
+}
+my-calendar td.mprev
+,my-calendar td.mnext {
+    ;background-color: rgba(170,170,170,0.6);
+    ;color: #eee
+}
+my-calendar td.today {
+    ;background-color: #666
+    ;color: #eee
+}
+my-calendar td.selected {
+    ;background-color: #06C
+    ;color: #eee
+}
+my-modal {
+    z-index: 1000;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding-top: 1rem;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: block;
+    background-color: rgba(204,204,204,0.6);
+}
+.my-modal-container {
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    width: 52rem;
+    border-radius: 6px;
+    background-color: #fff;
+}
+.my-modal-close {
+    cursor: pointer;
+    position: absolute;
+    right:0;
+    top:0;
+    padding: 1rem;
+}
+.my-modal-placeholder {
+    padding: 1rem 1rem;
+}
+
+my-calendar .button
+,my-calendar .indicator .scrollkey
+,my-calendar .indicator .scrollval
+,.title {
+    cursor: pointer;
+}         

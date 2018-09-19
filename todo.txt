@@ -1,0 +1,21 @@
+money - basic masking
+datetime - basic masking
+time - masking
+int
+
+---------
+textarea
+input text
+hidden
+password
+
+--------------
+zoom out to decades/ year/ month
+
+constrained functionality, styles
+
+validate whole form
+	
+
+ajax trigger
+
