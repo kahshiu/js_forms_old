@@ -12,6 +12,10 @@ function camelCase(str,delim) {
     }
     return arr.join("");
 }
+function decamelCase(str,delim) {
+    delim = delim || "-";
+    return str.split(/(?=[A-Z])/).join(delim);
+}
 // @example: pad0(new Date().getMonth(),2)
 // expects "02","03","05","07","10","11" 
 function pad0(num, size, pos) {
@@ -143,6 +147,38 @@ function objectifyString(str,delimKVal,delimPair) {
     }
     return result;
 }
+function objectMerger(a,b) {
+    var d = {};
+    for(var i in a) { d[i] = a[i]; };
+    for(var i in b) { d[i] = b[i]; };
+    return d;
+}
+function serialiseFormData (data,encodeVals) {
+    encodeVals = encodeVals===undefined? true: encodeVals;
+    var copy = {};
+    for(var i in data) { 
+        var temp = data[i].join();
+        if(encodeVals) temp = encodeURIComponent(temp);
+        copy[i] = temp;
+    }
+    return copy;
+}
+function chunkArray(s0,len){
+    len = Number(len);
+    var s1 = s0.slice(0); 
+    var t0 = [],t1 = [];
+    while(s1.length>0){
+        if(t0.length==len) {
+            t1.push(t0.slice(0));
+            t0 = [];
+        }
+        t0.push(s1.shift());
+    }
+    if(t0.length>0) {
+        t1.push(t0.slice(0));
+    }
+    return t1;
+}
 
 // fires once after sufficiently long inactivity. usage: rate limiting keyboard events
 function debounce () {
@@ -209,15 +245,19 @@ function ajax(config,handler,timeout) {
             }
         }
     };
-    var url,data,result = false;
+    var url,u0,data,result = false;
     if(config.action.length==0) return result;
 
+    u0 = config.action.split("?");
+
     if(config.method=="GET") {
-        url = config.action + "?" + stringifyObj(config.params);
+        url = u0[0] + "?" + stringifyObj(
+            objectMerger( config.params,objectifyString(u0[1]) )
+        );
         data = null;
     } else if(config.method=="POST") {
-        url = config.action + "?";
-        data = stringifyObj(config.params);
+        url = config.action;
+        data = stringifyObj( config.params );
     }
 
     xhttp.open(config.method,url,true);
