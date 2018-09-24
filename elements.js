@@ -1,4 +1,3 @@
-
 var customEl = {};
 
 // element: modal window
@@ -12,8 +11,8 @@ customEl.myModalContent = document.registerElement("my-modal-content",{
             // private data
             this.data = {};
 
-            // initialiser
-            this.init()
+            // initialise
+            elHide(this);
         }},
         attachedCallback: {value: function() {
         }},
@@ -23,8 +22,19 @@ customEl.myModalContent = document.registerElement("my-modal-content",{
         }},
 
         // methods
-        init: {value: function () {
-            elHide(this);
+        autoClose : {value: function(type,val){
+            if(type=="get") {
+                val = this.getAttribute("auto-close");
+                val = val? val: "1";
+
+            } else if(type=="set") {
+                if(val && val.length>0) {
+                    this.setAttribute("auto-close",val);
+                } else {
+                    val = "1";
+                }
+            }
+            return val;
         }},
         getContainer: {value: function () {
             if(!this.els.container) {
@@ -45,14 +55,17 @@ customEl.myModalContent = document.registerElement("my-modal-content",{
         }},
         hideContent: {value: function () {
             elHide(this.getContainer());
-        }},
+        }}
     })
 })
+// todo: signal needed here
 customEl.myModal = document.registerElement("my-modal",{
     prototype: Object.create(HTMLElement.prototype, {
         createdCallback: {value: function() {
             // element references
             this.els = {};
+            this.els.container = undefined;
+            this.els.closeButton = undefined;
             this.els.target = undefined;
             this.els.source = undefined;
 
@@ -60,7 +73,32 @@ customEl.myModal = document.registerElement("my-modal",{
             this.data = {};
 
             // initialiser
-            this.init()
+            this.els.container = document.createElement("div");
+            this.els.container.className = "my-modal-container";
+
+            this.els.closeButton = document.createElement("div");
+            this.els.closeButton.className = "my-modal-close";
+            this.els.closeButton.innerHTML = "&times;"
+
+            this.els.target = document.createElement("div");
+            this.els.target.className = "my-modal-placeholder";
+
+            this.els.container.appendChild(this.els.closeButton);
+            this.els.container.appendChild(this.els.target);
+            this.appendChild(this.els.container);
+
+            // event handlers
+            this.addEventListener("click",function(ev){
+                var t = ev.target;
+                var s = this.els.source;
+
+                if(s.autoClose("get")=="1" && (this.isElButton(t) || this.isElCanvas(t)) ) {
+                    s.hideContent();
+                } else if (s.autoClose("get")=="0" && this.isElButton(t)) {
+                    s.hideContent();
+                }
+            })
+            
         }},
         attachedCallback: {value: function() {
         }},
@@ -70,26 +108,11 @@ customEl.myModal = document.registerElement("my-modal",{
         }},
 
         // methods
-        init: {value: function () {
-            var container = document.createElement("div");
-            var closeButton = document.createElement("div");
-            var placeholder = document.createElement("div");
-            container.className = "my-modal-container";
-            closeButton.className = "my-modal-close";
-            closeButton.innerHTML = "&times;"
-            placeholder.className = "my-modal-placeholder";
-            container.appendChild(closeButton);
-            container.appendChild(placeholder);
-            this.appendChild(container);
-            this.els.target = placeholder;
-
-            // event handlers
-            this.addEventListener("click",function(ev){
-                var t = ev.target;
-                if(t===container || t===closeButton) {
-                    elHide(this);
-                }
-            })
+        isElCanvas: {value: function (e) {
+            return this===e;
+        }},
+        isElButton: {value: function (e) {
+            return this.els.closeButton && this.els.closeButton===e;
         }},
         moveContent: {value: function (s) {
             if(this.els.source && this.els.source!==s) {
@@ -98,11 +121,9 @@ customEl.myModal = document.registerElement("my-modal",{
             elMoveChildren(s,this.els.target);
         }},
         setSource: {value: function (el) {
-            if(el.tagName==="MY-MODAL-CONTENT") {
-                this.moveContent(el);
-                this.els.source = el;
-            }
-        }},
+            this.moveContent(el);
+            this.els.source = el;
+        }}
     })
 })
 
