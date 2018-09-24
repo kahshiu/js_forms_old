@@ -73,10 +73,10 @@ function getValueByGroup (groups,fnFilter) {
         var fn = fnFilter || function(el) { return true; };
         var target;
         switch(type) {
-        case "textarea"       : target = function (el,vals) { if(fn(el)) vals.push(el.value); }; break; 
-        case "input.text"     : target = function (el,vals) { if(fn(el)) vals.push(el.value); }; break; 
-        case "input.hidden"   : target = function (el,vals) { if(fn(el)) vals.push(el.value); }; break; 
-        case "input.password" : target = function (el,vals) { if(fn(el)) vals.push(el.value); }; break; 
+        case "textarea"       : target = function (el,vals) { if(fn(el)) vals.push(typeof el.getValue==="function"? el.getValue(): el.value); }; break; 
+        case "input.text"     : target = function (el,vals) { if(fn(el)) vals.push(typeof el.getValue==="function"? el.getValue(): el.value); }; break; 
+        case "input.hidden"   : target = function (el,vals) { if(fn(el)) vals.push(typeof el.getValue==="function"? el.getValue(): el.value); }; break; 
+        case "input.password" : target = function (el,vals) { if(fn(el)) vals.push(typeof el.getValue==="function"? el.getValue(): el.value); }; break; 
         case "input.radio"    : target = function (el,vals) { if(fn(el) && el.checked) vals.push(el.value); return vals.length>0;}; break; 
         case "input.checkbox" : target = function (el,vals) { if(fn(el) && el.checked) vals.push(el.value); }; break; 
         case "select"         : target = function (el,vals) { if(fn(el) && el.selected) vals.push(el.value); return vals.length>0;}; break; 

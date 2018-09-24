@@ -142,7 +142,6 @@ customEl.myMsg = document.registerElement("my-msg",{
             };
 
             // initialiser
-            this.init()
         }},
         attachedCallback: {value: function() {
         }},
@@ -152,8 +151,6 @@ customEl.myMsg = document.registerElement("my-msg",{
         }},
 
         // methods
-        init: {value: function () {
-        }},
         getChild: {value: function () {
             var el = this.els.frag.shift();
             if(!el) el = this.data.generator();
@@ -189,7 +186,7 @@ customEl.myMsgValidate = document.registerElement("my-msg-validate",{
             };
 
             // initialiser
-            this.init()
+            if(this.hookType("get")==="auto") this.hookTargets();
         }},
         attachedCallback: {value: function() {
         }},
@@ -235,9 +232,6 @@ customEl.myMsgValidate = document.registerElement("my-msg-validate",{
         }},
 
         // methods
-        init: {value: function () {
-            if(this.hookType("get")==="auto") this.hookTargets();
-        }},
         hookTargets: {value: function (namelist) {
             namelist = namelist || this.targetName("get") || "";
             var temp = namelist.split(",");
@@ -272,10 +266,14 @@ customEl.myTextbox = document.registerElement("my-textbox",{
         createdCallback: {value: function() {
             // element references
             this.els = {};
-            //this.els.container = undefined;
+            this.els.warningEl  = undefined;
+            this.els.calendar   = undefined;
 
             // private data
             this.data = {};
+            this.data.svalidated = new signals.Signal();
+            this.data.validation = undefined;
+            this.data.converted  = undefined;
             this.data.fnValue = function(ev){
                 var el = ev.target;    
                 el.setValue(el.value); 
@@ -292,7 +290,11 @@ customEl.myTextbox = document.registerElement("my-textbox",{
             this.data.debouncedFn = this.data.debounce.setup(this,this.data.fnValue,1000);
 
             // initialiser
-            this.init()
+            this.type = "text";
+
+            if( this.value.length>0 ) {
+                this.setValue(this.value); 
+            }
 
             // event handlers
             this.addEventListener("focus",function(ev){
@@ -339,18 +341,6 @@ customEl.myTextbox = document.registerElement("my-textbox",{
         }},
 
         // methods
-        init: {value: function () {
-            this.type = "text";
-            this.els.warningEl  = undefined;
-            this.els.calendar   = undefined;
-            this.data.svalidated = new signals.Signal();
-            this.data.validation = undefined;
-            this.data.converted  = undefined;
-
-            if( this.value.length>0 ) {
-                this.setValue(this.value); 
-            }
-        }},
         setValue: {value: function(source,datatype) {
             if(source.constructor !== String) source = this.value;
             datatype = datatype || this.getAttribute("data-type");
@@ -368,7 +358,13 @@ customEl.myTextbox = document.registerElement("my-textbox",{
             return this.getValue();
         }},
         getValue: {value: function () {
-            return this.data.converted;
+            //return this.data.converted;
+            var d,dtype = this.dataType("get");
+            d = this.data.converted;
+            if(dtype==="date" && d) {
+                d = this.data.converted.toISOString();
+            }
+            return d;
         }},
         setWarningEl: {value: function (el) {
             this.els.warningEl = el;
@@ -435,7 +431,7 @@ customEl.myTextbox = document.registerElement("my-textbox",{
         synchCalendar: {value: function () {
             if(this.dataType("get")=="date") {
                 var dtselected = this.getValue();
-                var dt   = dtselected || new Date();
+                var dt   = dtselected===undefined? new Date(): new Date(dtselected);
                 var dd   = dt.getDate();      
                 var mm   = dt.getMonth();    
                 var yyyy = dt.getFullYear(); 
@@ -459,12 +455,15 @@ customEl.myCheckboxRadio = document.registerElement("my-checkbox-radio",{
         createdCallback:{value: function() {
             // element references
             this.els = {};
+            this.els.warningEl = undefined;
 
             // private data
             this.data = {};
+            this.data.svalidated = new signals.Signal();
+            this.data.validation = undefined;
 
             // initialiser
-            this.init();
+            if(!this.type || this.type=="text") { this.type = "radio"; }
 
             this.addEventListener("change",function(ev){
                 var el = ev.target;
@@ -479,6 +478,8 @@ customEl.myCheckboxRadio = document.registerElement("my-checkbox-radio",{
             })
         }},
         attachedCallback: {value: function() {
+            // todo: testing
+            this.setValue();
         }},
         detachedCallback: {value: function() {
         }},
@@ -486,13 +487,6 @@ customEl.myCheckboxRadio = document.registerElement("my-checkbox-radio",{
         }},
 
         // methods:
-        init: {value: function () {
-            if(!this.type || this.type=="text") { this.type = "radio"; }
-
-            this.els.warningEl = undefined;
-            this.data.svalidated = new signals.Signal();
-            this.data.validation = undefined;
-        }},
         setValue: {value: function(source,filter) {
             var targetVal = this.getValue(filter);
             if(targetVal) { 
@@ -551,12 +545,12 @@ customEl.mySelect = document.registerElement("my-select",{
         createdCallback:{value: function() {
             // element references
             this.els = {};
+            this.els.warningEl = undefined;
 
             // private data
             this.data = {};
-
-            // initialiser
-            this.init();
+            this.data.svalidated = new signals.Signal();
+            this.data.validation = undefined;
 
             // event handlers
             this.addEventListener("change",function(ev) {
@@ -564,12 +558,6 @@ customEl.mySelect = document.registerElement("my-select",{
                 var list = this.getValue().join(",");
                 this.setValue(list);
             })
-        }},
-        init: {value: function () {
-            this.els.warningEl = undefined;
-
-            this.data.svalidated = new signals.Signal();
-            this.data.validation = undefined;
         }},
         setValue: {value: function(source,filter) {
             var targetVal = this.getValue(filter)
@@ -633,7 +621,6 @@ customEl.myTd = document.registerElement("my-td",{
             this.data = {};
 
             // initialiser
-            this.init();
         }},
         attachedCallback: {value: function() {
         }},
@@ -642,8 +629,6 @@ customEl.myTd = document.registerElement("my-td",{
         attributeChangedCallback: {value: function() {
         }},
         // methods
-        init: {value: function() {
-        }},
         setData: {value: function(d) {
             this.data = d;
         }},
@@ -674,21 +659,10 @@ customEl.myTr = document.registerElement("my-tr",{
         createdCallback: {value: function() {
             // element references
             this.els = {};
+            this.els.cached = [];
 
             // private data
             this.data = {};
-
-            // initialiser
-            this.init()
-        }},
-        attachedCallback: {value: function() {
-        }},
-        detachedCallback: {value: function() {
-        }},
-        attributeChangedCallback: {value: function() {
-        }},
-        // methods
-        init: {value: function() {
             this.data.fnGenerate = function (td,data,key,list) {
                 return td? td: document.createElement("td","my-td");
             }
@@ -699,8 +673,14 @@ customEl.myTr = document.registerElement("my-tr",{
             this.data.fnRender = function (td,data,key,list) {
                 td.textContent = td.getData();
             }
-            this.els.cached = [];
         }},
+        attachedCallback: {value: function() {
+        }},
+        detachedCallback: {value: function() {
+        }},
+        attributeChangedCallback: {value: function() {
+        }},
+        // methods
         cacheEls: {value: function () {
             while(this.lastElementChild) {
                 this.els.cached.unshift( this.removeChild(this.lastElementChild) );
@@ -732,7 +712,7 @@ customEl.myTr = document.registerElement("my-tr",{
             var target = undefined;
             elsEach(this.children,function(el,index,all){
                 var t = el.getPosition();
-                if(t.hasOwnProperty("colName")) {
+                if(isNaN(t.colName)) {
                     if(!target) target = {};
                     target[t.colName] = el.getData();
                 } else {
@@ -761,21 +741,12 @@ customEl.myTbody = document.registerElement("my-tbody",{
             // element references
             this.els = {};
             this.els.container = undefined;
+            this.els.cached = [];
 
             // private data
             this.data = {};
 
             // initialiser
-            this.init()
-        }},
-        attachedCallback: {value: function() {
-        }},
-        detachedCallback: {value: function() {
-        }},
-        attributeChangedCallback: {value: function() {
-        }},
-        // methods
-        init: {value: function () {
             this.data.fnGenerate = function (tr,data,key,list) {
                 return tr? tr: document.createElement("tr","my-tr");
             };
@@ -785,8 +756,14 @@ customEl.myTbody = document.registerElement("my-tbody",{
             this.data.fnRender = function (tr,data,key,list) {
                 tr.renderData(data);
             };
-            this.els.cached = [];
         }},
+        attachedCallback: {value: function() {
+        }},
+        detachedCallback: {value: function() {
+        }},
+        attributeChangedCallback: {value: function() {
+        }},
+        // methods
         cacheEls: {value: function () {
             while(this.lastElementChild) {
                 this.els.cached.unshift( this.removeChild(this.lastElementChild) );
@@ -824,21 +801,7 @@ customEl.myTable = document.registerElement("my-table",{
             this.els = {};
             this.els.container = undefined;
 
-            // private data
-            this.data = {};
-
             // initialiser
-            this.init();
-        }},
-        attachedCallback: {value: function() {
-        }},
-        detachedCallback: {value: function() {
-        }},
-        attributeChangedCallback: {value: function() {
-        }},
-        // methods
-        init: {value: function () {
-            // table head
             this.els.thead = this.getElementsByTagName("THEAD");
             if(this.els.thead>0) {
                 this.els.thead = this.els.tbody[0].firstElementChild;
@@ -864,7 +827,17 @@ customEl.myTable = document.registerElement("my-table",{
                 this.els.tbody = document.createElement("TBODY","my-tbody");
                 this.append(this.els.tbody);
             }
+
+            // private data
+            this.data = {};
         }},
+        attachedCallback: {value: function() {
+        }},
+        detachedCallback: {value: function() {
+        }},
+        attributeChangedCallback: {value: function() {
+        }},
+        // methods
         renderData: {value: function (d) {
             //data format: cf query
             this.els.thead.renderData( d.COLUMNS );
@@ -1083,6 +1056,7 @@ CalendarManager.prototype.isInputAug = function (el) {
     var c = this.scroller.getItem();
     return c && (
         elIs(el,{tagName:"INPUT",type:"text"})
+        && el.getAttribute("is")==="my-textbox"
         && el.dataType("get")==="date" 
         && el===c.getAugmentedInput()
     );
@@ -1433,6 +1407,10 @@ customEl.myBase = document.registerElement("my-base",{
             // private data
             this.data = {};
 
+            // initialiser
+            this.data.calman = new CalendarManager();
+
+            // event listener
             this.addEventListener("click",function(ev){
                 var mcal = this.getManager("calendar");
                 var t = ev.target;
@@ -1451,12 +1429,12 @@ customEl.myBase = document.registerElement("my-base",{
                     mcal.zIndexSorting();
                 }
             })
-
             this.addEventListener("focus",function(ev){
                 var mcal = this.getManager("calendar");
                 var t = ev.target;
 
                 var isInputDate = elIs(t,{tagName:"INPUT",type:"text"}) 
+                    && t.getAttribute("is")==="my-textbox"
                     && t.dataType("get")==="date";
 
                 if(isInputDate) {
@@ -1466,16 +1444,12 @@ customEl.myBase = document.registerElement("my-base",{
                 }
             },true)
 
-            this.init();
         }},
         attachedCallback: {value: function() {
         }},
         detachedCallback: {value: function() {
         }},
         attributeChangedCallback: {value: function() {
-        }},
-        init: {value: function () {
-            this.data.calman = new CalendarManager();
         }},
         getManager: {value: function (type) {
             var m;
@@ -1650,7 +1624,6 @@ customEl.myMsgLoop = document.registerElement("my-msg-loop",{
             this.data.fn = undefined;
 
             // initialiser
-            this.init()
         }},
         attachedCallback: {value: function() {
             this.els.div = document.createElement("DIV");
@@ -1662,8 +1635,6 @@ customEl.myMsgLoop = document.registerElement("my-msg-loop",{
         }},
 
         // methods
-        init: {value: function() {
-        }},
         showMsg : {value: function(type,val){
             if(type=="get") {
                 val = this.getAttribute("show-msg");
@@ -1715,15 +1686,6 @@ customEl.myAjax = document.registerElement("my-ajax",{
             this.data = {};
 
             // initialiser
-            this.init()
-        }},
-        attachedCallback: {value: function() {
-        }},
-        detachedCallback: {value: function() {
-        }},
-        attributeChangedCallback: {value: function() {
-        }},
-        init: {value: function () {
             this.data.msgtxt = { };
             this.data.msgtxt["ready"     ] = function () { return "Connecting"; }
             this.data.msgtxt["connected" ] = function () { return "Connecting" ; }
@@ -1736,6 +1698,12 @@ customEl.myAjax = document.registerElement("my-ajax",{
 
             this.data.msgloop = document.createElement("MY-MSG-LOOP");
             this.appendChild(this.data.msgloop);
+        }},
+        attachedCallback: {value: function() {
+        }},
+        detachedCallback: {value: function() {
+        }},
+        attributeChangedCallback: {value: function() {
         }},
         composeHandlerWithMsg: {value: function (handler) {
             var scope = this;
